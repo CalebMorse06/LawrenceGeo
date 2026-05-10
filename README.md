@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lawrence GeoGuessr
 
-## Getting Started
+A GeoGuessr-style web game scoped to Lawrence, KS. Players see a panorama —
+outdoor Street View, custom 360° interior, or photo carousel — and guess the
+location on a Lawrence map. 5 rounds, distance-based scoring.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + Tailwind
+- Mapbox GL JS — guess map (bounded to Lawrence)
+- Google Street View JS API — outdoor panoramas
+- Pannellum — custom 360° panoramas (loaded from CDN)
+- Supabase — Postgres for locations + game scores, Storage for panoramas
+- Vitest — unit tests for scoring math
+
+## Setup
 
 ```bash
+npm install
+cp .env.local.example .env.local
+# fill in the four NEXT_PUBLIC_* keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The `.env.local` keys you need:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Var | Where |
+| --- | --- |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | account.mapbox.com → Access tokens |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Cloud Console → Maps JS + Street View |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API (server-only, for seed script) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Restrict the Mapbox and Google keys by HTTP referrer before going to prod.
 
-## Learn More
+## Supabase setup
 
-To learn more about Next.js, take a look at the following resources:
+Apply the migrations in order:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+supabase/migrations/0001_locations.sql
+supabase/migrations/0002_games.sql
+supabase/migrations/0003_rls.sql
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Then seed locations from a CSV:
 
-## Deploy on Vercel
+```bash
+npx tsx scripts/seed-locations.ts path/to/locations.csv
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Expected CSV columns: `name,lat,lng,type,streetview_pano_id,pano_storage_path,photo_storage_paths,difficulty,tags`
+(use `|` to delimit array values for `photo_storage_paths` and `tags`).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+
+- `npm run dev` — Next.js dev server (turbopack)
+- `npm run build` — production build
+- `npm test` — vitest unit tests for scoring
+- `npx tsx scripts/seed-locations.ts <csv>` — seed locations
+- `npx tsx scripts/validate-streetview.ts` — ping Google to check every `streetview` row's pano id still resolves
+
+## Status
+
+Pre-MVP. A playable demo runs out of `lib/demoLocations.ts` (5 photo-type
+rounds) so the game loop is verifiable without Supabase. Switching `app/play`
+to `fetchActiveLocations()` from `lib/locations.ts` once the database is seeded
+is the next step.
