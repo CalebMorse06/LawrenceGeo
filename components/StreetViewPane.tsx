@@ -27,10 +27,14 @@ function loadGoogleMaps(): Promise<void> {
 }
 
 interface Props {
-  panoId: string;
+  panoId?: string | null;
+  lat?: number;
+  lng?: number;
+  heading?: number;
+  pitch?: number;
 }
 
-export default function StreetViewPane({ panoId }: Props) {
+export default function StreetViewPane({ panoId, lat, lng, heading, pitch }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,8 +42,7 @@ export default function StreetViewPane({ panoId }: Props) {
     loadGoogleMaps()
       .then(() => {
         if (cancelled || !containerRef.current || !window.google) return;
-        new window.google.maps.StreetViewPanorama(containerRef.current, {
-          pano: panoId,
+        const sharedOptions: google.maps.StreetViewPanoramaOptions = {
           addressControl: false,
           linksControl: false,
           panControl: false,
@@ -48,7 +51,41 @@ export default function StreetViewPane({ panoId }: Props) {
           showRoadLabels: false,
           clickToGo: false,
           disableDefaultUI: true,
-        });
+          motionTracking: false,
+          motionTrackingControl: false,
+          pov: { heading: heading ?? 0, pitch: pitch ?? 0 },
+        };
+
+        if (panoId) {
+          new window.google.maps.StreetViewPanorama(containerRef.current, {
+            ...sharedOptions,
+            pano: panoId,
+          });
+          return;
+        }
+
+        if (typeof lat !== "number" || typeof lng !== "number") {
+          if (containerRef.current) {
+            containerRef.current.innerText = "No pano id or coordinates provided.";
+          }
+          return;
+        }
+
+        const svc = new window.google.maps.StreetViewService();
+        svc.getPanorama(
+          { location: { lat, lng }, radius: 150, source: window.google.maps.StreetViewSource.OUTDOOR },
+          (data, status) => {
+            if (cancelled || !containerRef.current || !window.google) return;
+            if (status !== window.google.maps.StreetViewStatus.OK || !data) {
+              containerRef.current.innerText = "No Street View imagery near this point.";
+              return;
+            }
+            new window.google.maps.StreetViewPanorama(containerRef.current, {
+              ...sharedOptions,
+              pano: data.location?.pano ?? undefined,
+            });
+          },
+        );
       })
       .catch((err) => {
         if (containerRef.current) containerRef.current.innerText = (err as Error).message;
@@ -56,7 +93,13 @@ export default function StreetViewPane({ panoId }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [panoId]);
+  }, [panoId, lat, lng, heading, pitch]);
 
-  return <div ref={containerRef} className="h-full w-full bg-zinc-900" />;
+  return (
+    <div
+      ref={containerRef}
+      className="h-full w-full bg-stone-900"
+      style={{ touchAction: "none" }}
+    />
+  );
 }

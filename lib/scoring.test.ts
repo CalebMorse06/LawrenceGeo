@@ -21,8 +21,16 @@ describe("roundScore", () => {
     expect(roundScore(0)).toBe(5000);
   });
   it("drops off with distance", () => {
-    expect(roundScore(400)).toBeLessThan(2000);
-    expect(roundScore(1000)).toBeLessThan(500);
+    // Curve: roundScore = round(5000 * exp(-d/500))
+    // 200m  → ~3352
+    // 500m  → ~1839
+    // 1km   → ~677
+    // 2km   → ~92
+    // 5km+  → ~0
+    expect(roundScore(200)).toBeGreaterThan(3000);
+    expect(roundScore(200)).toBeLessThan(3500);
+    expect(roundScore(1000)).toBeGreaterThan(600);
+    expect(roundScore(1000)).toBeLessThan(750);
     expect(roundScore(5000)).toBeLessThan(5);
   });
   it("clamps negatives to 0", () => {

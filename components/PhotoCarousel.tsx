@@ -13,7 +13,7 @@ export default function PhotoCarousel({ photoUrls }: Props) {
   const next = () => setIndex((i) => (i + 1) % total);
 
   return (
-    <div className="relative h-full w-full bg-zinc-900">
+    <div className="relative h-full w-full bg-dusk">
       {photoUrls.length > 0 && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -25,18 +25,20 @@ export default function PhotoCarousel({ photoUrls }: Props) {
       {total > 1 && (
         <>
           <button
+            aria-label="Previous photo"
             onClick={prev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-white"
+            className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-ink/70 px-3 py-2 text-lg text-paper backdrop-blur"
           >
             ‹
           </button>
           <button
+            aria-label="Next photo"
             onClick={next}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/60 px-3 py-2 text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-ink/70 px-3 py-2 text-lg text-paper backdrop-blur"
           >
             ›
           </button>
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-sm text-white">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-ink/70 px-3 py-1 text-xs font-mono text-paper backdrop-blur">
             {index + 1} / {total}
           </div>
         </>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,9 +12,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const display = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Lawrence GeoGuessr",
-  description: "Guess locations in Lawrence, KS — from Mass St to bar interiors and KU campus.",
+  title: "Lawrence Geo — guess your way around LFK",
+  description:
+    "A guess-the-place game for Lawrence, KS. From Mass St on a Saturday night to the back end of Jayhawk Blvd. Five rounds. How well do you really know your town?",
+  openGraph: {
+    title: "Lawrence Geo",
+    description: "Five rounds. How well do you really know LFK?",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -25,9 +36,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">{children}</body>
+      <body className="min-h-full flex flex-col paper-grain">{children}</body>
     </html>
   );
 }

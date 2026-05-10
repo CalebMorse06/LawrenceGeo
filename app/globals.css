@@ -1,26 +1,94 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* KU palette */
+  --crimson: #e8000d;
+  --crimson-deep: #a4123f;
+  --jayhawk-blue: #0051ba;
+  --jayhawk-blue-deep: #003a85;
+
+  /* Warm neutrals — limestone, chalk, dusk */
+  --limestone: #f4eee2;
+  --paper: #faf6ec;
+  --chalk: #ece5d5;
+  --ink: #1a1814;
+  --ink-soft: #3a342b;
+  --dusk: #2b1f1c;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-crimson: var(--crimson);
+  --color-crimson-deep: var(--crimson-deep);
+  --color-jayhawk: var(--jayhawk-blue);
+  --color-jayhawk-deep: var(--jayhawk-blue-deep);
+  --color-limestone: var(--limestone);
+  --color-paper: var(--paper);
+  --color-chalk: var(--chalk);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-dusk: var(--dusk);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-display);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
 }
+
+/* Subtle paper grain — a faint, soft noise behind the page that gives the
+   limestone tone some life without being distracting. */
+.paper-grain {
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(164, 18, 63, 0.04), transparent 45%),
+    radial-gradient(circle at 80% 80%, rgba(0, 81, 186, 0.04), transparent 45%),
+    var(--paper);
+}
+
+.display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.display-tight {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.9;
+}
+
+.eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+@keyframes ku-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.ku-pulse { animation: ku-pulse 2s ease-in-out infinite; }
+
+@keyframes draw-line {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+.draw-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-line 900ms ease-out forwards;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: rise-in 400ms ease-out both; }

@@ -16,8 +16,14 @@ function buildStorageUrl(base: string | undefined, path: string): string {
 }
 
 export default function PanoramaViewer({ location, storageBaseUrl }: Props) {
-  if (location.type === "streetview" && location.streetviewPanoId) {
-    return <StreetViewPane panoId={location.streetviewPanoId} />;
+  if (location.type === "streetview") {
+    return (
+      <StreetViewPane
+        panoId={location.streetviewPanoId}
+        lat={location.lat}
+        lng={location.lng}
+      />
+    );
   }
   if (location.type === "pano360" && location.panoStoragePath) {
     return <Pano360Pane panoramaUrl={buildStorageUrl(storageBaseUrl, location.panoStoragePath)} />;

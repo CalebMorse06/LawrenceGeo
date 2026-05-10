@@ -3,7 +3,7 @@ export type LatLng = { lat: number; lng: number };
 export const LAWRENCE_CENTER: LatLng = { lat: 38.9717, lng: -95.2353 };
 
 export const MAX_ROUND_SCORE = 5000;
-export const SCORE_DECAY_METERS = 400;
+export const SCORE_DECAY_METERS = 500;
 export const ROUNDS_PER_GAME = 5;
 export const MAX_GAME_SCORE = MAX_ROUND_SCORE * ROUNDS_PER_GAME;
 
@@ -27,4 +27,27 @@ export function roundScore(distanceMeters: number): number {
 export function scoreGuess(guess: LatLng, actual: LatLng) {
   const distanceMeters = haversineMeters(guess, actual);
   return { distanceMeters, score: roundScore(distanceMeters) };
+}
+
+export interface ScoreTier {
+  threshold: number;
+  label: string;
+  blurb: string;
+}
+
+// Public scoring tiers — used by the score card badge and the leaderboard
+// "what's a good score" reference. Tuned for SCORE_DECAY_METERS = 500.
+export const SCORE_TIERS: ScoreTier[] = [
+  { threshold: 21000, label: "Townie", blurb: "avg ~100m per round" },
+  { threshold: 17000, label: "Bona fide alum", blurb: "avg ~200m per round" },
+  { threshold: 12000, label: "Knows the bars", blurb: "avg ~350m per round" },
+  { threshold: 7000, label: "Passing through", blurb: "avg ~600m per round" },
+  { threshold: 0, label: "Topeka adjacent", blurb: "you got lost on Iowa" },
+];
+
+export function tierFor(totalScore: number): ScoreTier {
+  for (const t of SCORE_TIERS) {
+    if (totalScore >= t.threshold) return t;
+  }
+  return SCORE_TIERS[SCORE_TIERS.length - 1];
 }
