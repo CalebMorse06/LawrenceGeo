@@ -34,6 +34,10 @@ yarn-error.log*
 .env*
 !.env.local.example
 
+# Claude Code project MCP config — contains your Supabase project ref. Each
+# forker should run `claude mcp add` to register their own.
+.mcp.json
+
 # vercel
 .vercel
 
