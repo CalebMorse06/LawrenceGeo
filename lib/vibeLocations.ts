@@ -75,4 +75,39 @@ export const VIBE_LOCATIONS: GameLocation[] = [
   sv("vibe-23rd-brewery", "23rd Street Brewery (3512 Clinton Pkwy)", 38.9450, -95.2620, 2, ["bar", "23rd-st"]),
   sv("vibe-henrys", "Henry's Coffee Shop (downtown)", 38.9712, -95.2354, 2, ["downtown"]),
   sv("vibe-the-merc", "The Merc Co-op (downtown)", 38.9686, -95.2380, 2, ["downtown", "shopping"]),
+
+  // ── The Hawk — KU's iconic dive bar ──────────────────────────────────
+  sv("vibe-the-hawk", "The Hawk (1340 Ohio)", 38.9582, -95.2440, 1, ["bar", "campus", "lawrence-staple"]),
+
+  // ── Logies (Mass St) — placeholder; confirm exact spot ──────────────
+  // TODO: replace with the real address + name. SV will snap to the
+  // nearest pano within 150m.
+  sv("vibe-logies", "Logies (Mass St)", 38.9720, -95.2353, 2, ["mass-st", "bar"]),
+
+  // ── Greek Row on Tennessee St ───────────────────────────────────────
+  // Coords are approximate by block; SV will snap. Houses move/swap
+  // chapters every few years so confirm whoever's there now.
+  sv("vibe-frat-sae", "Sigma Alpha Epsilon (1301 Tennessee)", 38.9585, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-lambda-chi", "Lambda Chi Alpha (1340 Tennessee)", 38.9582, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-pike", "Pi Kappa Alpha (1414 Tennessee)", 38.9576, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-beta", "Beta Theta Pi (1425 Tennessee)", 38.9575, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-sigma-chi", "Sigma Chi (1439 Tennessee)", 38.9573, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-sigma-nu", "Sigma Nu (1501 Tennessee)", 38.9568, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-theta-chi", "Theta Chi (1502 Tennessee)", 38.9568, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-fiji", "Phi Gamma Delta — FIJI (1545 Tennessee)", 38.9564, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-sigep", "Sigma Phi Epsilon (1645 Tennessee)", 38.9555, -95.2412, 3, ["greek", "campus", "tennessee-st"]),
+  sv("vibe-frat-phi-delt", "Phi Delta Theta (1621 Edgehill)", 38.9558, -95.2403, 3, ["greek", "campus"]),
+  sv("vibe-frat-phi-psi", "Phi Kappa Psi (1100 Indiana)", 38.9602, -95.2454, 3, ["greek", "campus"]),
+  sv("vibe-frat-du", "Delta Upsilon (1025 Mississippi)", 38.9608, -95.2418, 3, ["greek", "campus"]),
+  sv("vibe-frat-delt", "Delta Tau Delta (1111 W 11th)", 38.9600, -95.2470, 3, ["greek", "campus"]),
+
+  // ── Other staples OSM missed (in addition to ones above) ────────────
+  sv("vibe-decade", "Decade Coffee (920 Mass)", 38.9720, -95.2353, 3, ["mass-st", "cafe"]),
+  sv("vibe-cottins", "Cottin's Hardware (1832 Mass)", 38.9550, -95.2353, 3, ["mass-st", "lawrence-staple"]),
+  sv("vibe-dempseys", "Dempsey's Burger Pub (623 Vermont)", 38.9697, -95.2370, 3, ["downtown", "bar"]),
+  sv("vibe-mirth", "Mirth Cafe (745 New Hampshire)", 38.9708, -95.2342, 3, ["downtown", "cafe"]),
+  sv("vibe-maceli", "Maceli's Banquet Hall (1031 New Hampshire)", 38.9724, -95.2342, 3, ["downtown"]),
+  sv("vibe-pachamama", "Pachamama's (800 New Hampshire)", 38.9711, -95.2342, 3, ["downtown"]),
+  sv("vibe-wakarusa-brewing", "Wakarusa Brewing Co (west Lawrence)", 38.9446, -95.2790, 3, ["west-lawrence", "bar"]),
+  sv("vibe-aimees", "Aimee's Coffeehouse (1025 Mass)", 38.9728, -95.2353, 3, ["mass-st", "cafe"]),
 ];

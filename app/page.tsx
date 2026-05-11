@@ -5,7 +5,6 @@ const FEATURED = [
   "Mass St",
   "Allen Fieldhouse",
   "The Hill",
-  "Bullwinkle's",
   "Free State Brewing",
   "The Oread",
   "Daisy Hill",
@@ -55,7 +54,7 @@ export default function Home() {
             </li>
           ))}
           <li className="rounded-full border border-jayhawk/30 bg-jayhawk/5 px-3 py-1 text-sm text-jayhawk-deep">
-            + 160 more
+            + 184 more
           </li>
         </ul>
 
