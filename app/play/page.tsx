@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import GuessMap from "@/components/GuessMap";
+import LogoMark from "@/components/LogoMark";
 import PanoramaViewer from "@/components/PanoramaViewer";
 import RoundResult from "@/components/RoundResult";
 import ScoreCard from "@/components/ScoreCard";
@@ -199,8 +200,9 @@ export default function PlayPage() {
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-3">
         <Link
           href="/"
-          className="pointer-events-auto rounded-md bg-paper/95 px-3 py-2 text-sm font-medium text-ink backdrop-blur transition hover:bg-paper"
+          className="pointer-events-auto inline-flex items-center gap-2 rounded-md bg-paper/95 px-3 py-2 text-sm font-medium text-ink backdrop-blur transition hover:bg-paper"
         >
+          <LogoMark size={22} />
           <Wordmark size="sm" />
         </Link>
         <div className="pointer-events-auto flex gap-2">
