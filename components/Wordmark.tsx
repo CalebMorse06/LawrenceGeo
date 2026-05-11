@@ -7,7 +7,7 @@ const SIZES: Record<NonNullable<Props["size"]>, string> = {
   sm: "text-2xl",
   md: "text-4xl",
   lg: "text-6xl sm:text-7xl",
-  xl: "text-7xl sm:text-8xl md:text-9xl",
+  xl: "text-5xl sm:text-7xl md:text-8xl lg:text-9xl",
 };
 
 export default function Wordmark({ size = "lg", className = "" }: Props) {

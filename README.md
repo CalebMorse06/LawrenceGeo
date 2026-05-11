@@ -6,7 +6,7 @@ home of KU. Players see a Street View panorama from somewhere in town
 on a Lawrence map, and score on how close they got. Five rounds, share
 the result, save your name to the leaderboard.
 
-**Try the live version:** *(coming soon — Vercel URL goes here)*
+**Try the live version:** <https://lawrence-geo.vercel.app>
 
 ---
 
