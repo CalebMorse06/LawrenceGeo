@@ -14,11 +14,13 @@ import type { GameLocation } from "@/lib/types";
 
 type Mode = "daily" | "freeplay";
 
+const ROUND_SECONDS = 60;
+
 interface CompletedRound {
   locationName: string;
   distanceM: number;
   score: number;
-  guess: LatLng;
+  guess: LatLng | null;
   actual: LatLng;
 }
 
@@ -65,11 +67,26 @@ export default function PlayPage() {
   const [committedRound, setCommittedRound] = useState<CompletedRound | null>(null);
   const [completed, setCompleted] = useState<CompletedRound[]>([]);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
 
   // Auto-expand on commit so the reveal pins + line are visible.
   useEffect(() => {
     if (committedRound) setMapExpanded(true);
   }, [committedRound]);
+
+  // Reset timer at the start of each round and on replay.
+  useEffect(() => {
+    setTimeLeft(ROUND_SECONDS);
+  }, [roundIdx, seed]);
+
+  // Tick down while the round is live.
+  useEffect(() => {
+    if (committedRound) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => Math.max(0, t - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [committedRound, roundIdx, seed]);
 
   if (rounds.length === 0) {
     return <p className="p-8">No locations available.</p>;
@@ -78,6 +95,31 @@ export default function PlayPage() {
   const current = rounds[roundIdx];
   const isLastRound = roundIdx === rounds.length - 1;
   const isGameOver = completed.length === rounds.length;
+
+  // Auto-commit when the timer expires. If they had a pin down, score it;
+  // otherwise it's a forfeit at 0 points.
+  useEffect(() => {
+    if (timeLeft > 0 || committedRound || isGameOver) return;
+    const actual = { lat: current.lat, lng: current.lng };
+    if (guess) {
+      const { score, distanceMeters } = scoreGuess(guess, actual);
+      setCommittedRound({
+        locationName: current.name,
+        distanceM: distanceMeters,
+        score,
+        guess,
+        actual,
+      });
+    } else {
+      setCommittedRound({
+        locationName: current.name,
+        distanceM: 0,
+        score: 0,
+        guess: null,
+        actual,
+      });
+    }
+  }, [timeLeft, committedRound, isGameOver, guess, current]);
 
   function submit() {
     if (!guess) return;
@@ -130,8 +172,8 @@ export default function PlayPage() {
           }))}
           fullRounds={completed.map((r, i) => ({
             locationId: rounds[i]?.id ?? "",
-            guessLat: r.guess.lat,
-            guessLng: r.guess.lng,
+            guessLat: r.guess?.lat ?? 0,
+            guessLng: r.guess?.lng ?? 0,
             distanceM: r.distanceM,
             score: r.score,
           }))}
@@ -166,6 +208,16 @@ export default function PlayPage() {
             <div className="eyebrow text-[0.6rem]">round</div>
             <div className="text-base font-semibold">
               {roundIdx + 1} / {rounds.length}
+            </div>
+          </div>
+          <div className="rounded-md bg-paper/95 px-3 py-2 text-xs font-mono text-ink backdrop-blur">
+            <div className="eyebrow text-[0.6rem]">time</div>
+            <div
+              className={`text-base font-semibold tabular-nums ${
+                timeLeft <= 10 && !committedRound ? "text-crimson" : ""
+              }`}
+            >
+              0:{String(timeLeft).padStart(2, "0")}
             </div>
           </div>
           <div className="rounded-md bg-paper/95 px-3 py-2 text-xs font-mono text-ink backdrop-blur">

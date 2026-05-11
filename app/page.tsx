@@ -16,7 +16,7 @@ export default function Home() {
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-20">
       <div className="flex w-full max-w-3xl flex-col items-start gap-8 rise-in">
         <div className="flex flex-col gap-3">
-          <span className="eyebrow">Five rounds · LFK</span>
+          <span className="eyebrow">Five rounds · Lawrence, KS</span>
           <Wordmark size="xl" />
           <p className="display text-2xl text-ink-soft sm:text-3xl">
             The town you thought you knew.

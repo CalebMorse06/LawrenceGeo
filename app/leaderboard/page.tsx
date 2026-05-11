@@ -7,6 +7,8 @@ import type { LeaderboardRow } from "@/lib/games";
 
 export const dynamic = "force-dynamic";
 
+type Tab = "today" | "alltime" | "freeplay";
+
 interface PageProps {
   searchParams: Promise<{ tab?: string; date?: string }>;
 }
@@ -24,7 +26,7 @@ async function fetchDaily(date: string): Promise<LeaderboardRow[]> {
   return (data as LeaderboardRow[]) ?? [];
 }
 
-async function fetchAllTime(): Promise<LeaderboardRow[]> {
+async function fetchAllTimeDaily(): Promise<LeaderboardRow[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("games")
@@ -33,7 +35,23 @@ async function fetchAllTime(): Promise<LeaderboardRow[]> {
     .order("total_score", { ascending: false })
     .limit(250);
   if (error) throw new Error(error.message);
-  // Dedupe by nickname (keep each player's best ever score).
+  const byNick = new Map<string, LeaderboardRow>();
+  for (const row of (data as LeaderboardRow[]) ?? []) {
+    const key = row.player_nickname.trim().toLowerCase();
+    if (!byNick.has(key)) byNick.set(key, row);
+  }
+  return [...byNick.values()].slice(0, 50);
+}
+
+async function fetchFreeplay(): Promise<LeaderboardRow[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("games")
+    .select("player_nickname, total_score, created_at, daily_date")
+    .eq("mode", "freeplay")
+    .order("total_score", { ascending: false })
+    .limit(250);
+  if (error) throw new Error(error.message);
   const byNick = new Map<string, LeaderboardRow>();
   for (const row of (data as LeaderboardRow[]) ?? []) {
     const key = row.player_nickname.trim().toLowerCase();
@@ -54,18 +72,51 @@ function formatRelative(iso: string): string {
   return `${d}d ago`;
 }
 
+const TAB_DESCRIPTIONS: Record<Tab, { eyebrow: (date: string) => string; empty: string; cta: string; ctaHref: string }> = {
+  today: {
+    eyebrow: (date) => date,
+    empty: "Be the first to play today's daily.",
+    cta: "Play today's daily →",
+    ctaHref: "/play?mode=daily",
+  },
+  alltime: {
+    eyebrow: () => "all-time best daily per player",
+    empty: "Once people start saving their daily runs, the all-time board fills up here.",
+    cta: "Play today's daily →",
+    ctaHref: "/play?mode=daily",
+  },
+  freeplay: {
+    eyebrow: () => "best freeplay run per player",
+    empty: "No freeplay runs saved yet. Take a shot at the high score.",
+    cta: "Start a freeplay run →",
+    ctaHref: "/play",
+  },
+};
+
 export default async function LeaderboardPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const tab = params.tab === "alltime" ? "alltime" : "today";
+  const tab: Tab =
+    params.tab === "alltime" ? "alltime" : params.tab === "freeplay" ? "freeplay" : "today";
   const today = todayInLawrence();
   const date = params.date ?? today;
 
   let rows: LeaderboardRow[] = [];
   let errorMsg: string | null = null;
   try {
-    rows = tab === "alltime" ? await fetchAllTime() : await fetchDaily(date);
+    if (tab === "freeplay") rows = await fetchFreeplay();
+    else if (tab === "alltime") rows = await fetchAllTimeDaily();
+    else rows = await fetchDaily(date);
   } catch (err) {
     errorMsg = (err as Error).message;
+  }
+
+  const desc = TAB_DESCRIPTIONS[tab];
+
+  function tabClass(t: Tab): string {
+    return [
+      "rounded-full px-4 py-1.5 text-sm font-medium transition",
+      tab === t ? "bg-crimson text-paper" : "text-ink-soft hover:text-ink",
+    ].join(" ");
   }
 
   return (
@@ -78,23 +129,14 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
       </div>
 
       <nav className="flex gap-2 rounded-full border border-ink/15 bg-paper p-1">
-        <Link
-          href="/leaderboard"
-          className={[
-            "rounded-full px-4 py-1.5 text-sm font-medium transition",
-            tab === "today" ? "bg-crimson text-paper" : "text-ink-soft hover:text-ink",
-          ].join(" ")}
-        >
+        <Link href="/leaderboard" className={tabClass("today")}>
           Today
         </Link>
-        <Link
-          href="/leaderboard?tab=alltime"
-          className={[
-            "rounded-full px-4 py-1.5 text-sm font-medium transition",
-            tab === "alltime" ? "bg-crimson text-paper" : "text-ink-soft hover:text-ink",
-          ].join(" ")}
-        >
-          All-time
+        <Link href="/leaderboard?tab=alltime" className={tabClass("alltime")}>
+          All-time daily
+        </Link>
+        <Link href="/leaderboard?tab=freeplay" className={tabClass("freeplay")}>
+          Freeplay
         </Link>
       </nav>
 
@@ -104,24 +146,18 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
         ) : rows.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <p className="display text-2xl text-ink">No scores yet.</p>
-            <p className="text-sm text-ink-soft">
-              {tab === "today"
-                ? `Be the first to play today's daily.`
-                : `Once people start saving their daily runs, the all-time board fills up here.`}
-            </p>
+            <p className="text-sm text-ink-soft">{desc.empty}</p>
             <Link
-              href="/play?mode=daily"
+              href={desc.ctaHref}
               className="mt-2 rounded-md bg-crimson px-4 py-2 text-sm font-medium text-paper hover:bg-crimson-deep"
             >
-              Play today&rsquo;s daily →
+              {desc.cta}
             </Link>
           </div>
         ) : (
           <>
             <header className="mb-3 flex items-baseline justify-between text-xs">
-              <span className="eyebrow">
-                {tab === "today" ? date : "all-time best per player"}
-              </span>
+              <span className="eyebrow">{desc.eyebrow(date)}</span>
               <span className="font-mono text-ink-soft">{rows.length} entries</span>
             </header>
             <ol className="divide-y divide-ink/10">
@@ -142,9 +178,7 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
                   >
                     {i + 1}.
                   </span>
-                  <span className="truncate font-medium text-ink">
-                    {row.player_nickname}
-                  </span>
+                  <span className="truncate font-medium text-ink">{row.player_nickname}</span>
                   <span className="font-mono text-sm tabular-nums text-ink">
                     {row.total_score.toLocaleString()}
                   </span>
@@ -158,8 +192,11 @@ export default async function LeaderboardPage({ searchParams }: PageProps) {
         )}
       </div>
 
-      <Link href="/play?mode=daily" className="text-sm font-medium text-jayhawk-deep underline-offset-4 hover:underline">
-        Play today&rsquo;s daily →
+      <Link
+        href={desc.ctaHref}
+        className="text-sm font-medium text-jayhawk-deep underline-offset-4 hover:underline"
+      >
+        {desc.cta}
       </Link>
 
       <section className="w-full max-w-xl">

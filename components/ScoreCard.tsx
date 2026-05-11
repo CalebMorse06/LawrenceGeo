@@ -73,14 +73,12 @@ export default function ScoreCard({
         shareUrl={shareUrl}
       />
 
-      {mode === "daily" && (
-        <LeaderboardSave
-          totalScore={totalScore}
-          rounds={fullRounds}
-          mode={mode}
-          dailyDate={dailyDate}
-        />
-      )}
+      <LeaderboardSave
+        totalScore={totalScore}
+        rounds={fullRounds}
+        mode={mode}
+        dailyDate={dailyDate}
+      />
 
       <div className="flex gap-2">
         <button

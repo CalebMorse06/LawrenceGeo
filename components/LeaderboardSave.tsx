@@ -63,7 +63,9 @@ export default function LeaderboardSave({ totalScore, rounds, mode, dailyDate }:
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <label htmlFor="nickname" className="eyebrow">
-        Save to today&rsquo;s leaderboard
+        {mode === "daily"
+          ? "Save to today’s leaderboard"
+          : "Save to the freeplay leaderboard"}
       </label>
       <div className="flex gap-2">
         <input
