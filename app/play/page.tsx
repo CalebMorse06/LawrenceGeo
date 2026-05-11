@@ -75,10 +75,10 @@ export default function PlayPage() {
     if (committedRound) setMapExpanded(true);
   }, [committedRound]);
 
-  // Reset timer at the start of each round and on replay.
-  useEffect(() => {
-    setTimeLeft(ROUND_SECONDS);
-  }, [roundIdx, seed]);
+  // Timer is reset synchronously inside `next()` / `playAgain()` so it
+  // batches with the other state changes — otherwise the auto-commit
+  // effect below would re-fire with a stale `timeLeft === 0` after
+  // advancing and forfeit the next round before it begins.
 
   // Tick down while the round is live.
   useEffect(() => {
@@ -141,6 +141,7 @@ export default function PlayPage() {
     setCommittedRound(null);
     setGuess(null);
     setMapExpanded(false);
+    setTimeLeft(ROUND_SECONDS);
     if (!isLastRound) setRoundIdx(roundIdx + 1);
   }
 
@@ -151,6 +152,7 @@ export default function PlayPage() {
     setCommittedRound(null);
     setCompleted([]);
     setMapExpanded(false);
+    setTimeLeft(ROUND_SECONDS);
   }
 
   if (isGameOver) {
