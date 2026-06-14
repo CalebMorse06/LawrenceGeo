@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,6 +25,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://lawrence-geo.vercel.app"),
   title: "Lawrence Geo — guess your way around Lawrence, KS",
   description:
     "A guess-the-place game for Lawrence, KS. From Mass St on a Saturday night to the back end of Jayhawk Blvd. Five rounds. How well do you really know your town?",
@@ -31,6 +33,12 @@ export const metadata: Metadata = {
     title: "Lawrence Geo",
     description: "Five rounds. How well do you really know Lawrence?",
     type: "website",
+    siteName: "Lawrence Geo",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lawrence Geo",
+    description: "Five rounds. How well do you really know Lawrence?",
   },
 };
 
@@ -44,7 +52,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col paper-grain">{children}</body>
+      <body className="min-h-full flex flex-col paper-grain">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
