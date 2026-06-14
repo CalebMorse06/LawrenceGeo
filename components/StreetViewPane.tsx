@@ -34,15 +34,65 @@ interface Props {
   pitch?: number;
 }
 
+function getPanorama(
+  svc: google.maps.StreetViewService,
+  request: google.maps.StreetViewLocationRequest | google.maps.StreetViewPanoRequest,
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    svc.getPanorama(request, (data, status) => {
+      if (status === window.google!.maps.StreetViewStatus.OK && data?.location?.pano) {
+        resolve(data.location.pano);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+// Resolve a usable pano id, escalating outward so a round never ends up blank:
+// a stale hardcoded pano falls back to coordinates, and the coordinate search
+// widens its radius and finally drops the outdoor-only constraint before
+// giving up. The OUTDOOR source is preferred first so players don't spawn
+// inside a business.
+async function resolvePano(
+  panoId: string | null | undefined,
+  lat: number | undefined,
+  lng: number | undefined,
+): Promise<string | null> {
+  const svc = new window.google!.maps.StreetViewService();
+  if (panoId) {
+    const direct = await getPanorama(svc, { pano: panoId });
+    if (direct) return direct;
+  }
+  if (typeof lat !== "number" || typeof lng !== "number") return null;
+  const { OUTDOOR, DEFAULT } = window.google!.maps.StreetViewSource;
+  const attempts: google.maps.StreetViewLocationRequest[] = [
+    { location: { lat, lng }, radius: 150, source: OUTDOOR },
+    { location: { lat, lng }, radius: 400, source: OUTDOOR },
+    { location: { lat, lng }, radius: 1000, source: DEFAULT },
+  ];
+  for (const attempt of attempts) {
+    const found = await getPanorama(svc, attempt);
+    if (found) return found;
+  }
+  return null;
+}
+
 export default function StreetViewPane({ panoId, lat, lng, heading, pitch }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     loadGoogleMaps()
-      .then(() => {
+      .then(() => resolvePano(panoId, lat, lng))
+      .then((pano) => {
         if (cancelled || !containerRef.current || !window.google) return;
-        const sharedOptions: google.maps.StreetViewPanoramaOptions = {
+        if (!pano) {
+          containerRef.current.innerText = "No Street View imagery near this point.";
+          return;
+        }
+        new window.google.maps.StreetViewPanorama(containerRef.current, {
+          pano,
           addressControl: false,
           linksControl: false,
           panControl: false,
@@ -54,38 +104,7 @@ export default function StreetViewPane({ panoId, lat, lng, heading, pitch }: Pro
           motionTracking: false,
           motionTrackingControl: false,
           pov: { heading: heading ?? 0, pitch: pitch ?? 0 },
-        };
-
-        if (panoId) {
-          new window.google.maps.StreetViewPanorama(containerRef.current, {
-            ...sharedOptions,
-            pano: panoId,
-          });
-          return;
-        }
-
-        if (typeof lat !== "number" || typeof lng !== "number") {
-          if (containerRef.current) {
-            containerRef.current.innerText = "No pano id or coordinates provided.";
-          }
-          return;
-        }
-
-        const svc = new window.google.maps.StreetViewService();
-        svc.getPanorama(
-          { location: { lat, lng }, radius: 150, source: window.google.maps.StreetViewSource.OUTDOOR },
-          (data, status) => {
-            if (cancelled || !containerRef.current || !window.google) return;
-            if (status !== window.google.maps.StreetViewStatus.OK || !data) {
-              containerRef.current.innerText = "No Street View imagery near this point.";
-              return;
-            }
-            new window.google.maps.StreetViewPanorama(containerRef.current, {
-              ...sharedOptions,
-              pano: data.location?.pano ?? undefined,
-            });
-          },
-        );
+        });
       })
       .catch((err) => {
         if (containerRef.current) containerRef.current.innerText = (err as Error).message;
